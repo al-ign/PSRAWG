@@ -6,7 +6,7 @@ This project was originally to create https://github.com/al-ign/PS2Kanboard modu
 
 # Usage
 
-Refer to [projects/ExampleProject] for the basic usage in the form of a mockup project
+Refer to [projects/ExampleProject/README.md] for the basic usage in the form of a mockup project
 
-[projects/Kanboard-PHPApi-PSRAWG/] contains original PS2Kanboard generator
+[projects/Kanboard-PHPApi-PSRAWG] contains original PS2Kanboard generator
 
