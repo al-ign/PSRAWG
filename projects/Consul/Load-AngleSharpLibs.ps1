@@ -1,0 +1,1 @@
+﻿gci -Filter 'netstandard2*' -Recurse | gci -Filter *.dll | %{ Add-Type -Path $_.fullname}
