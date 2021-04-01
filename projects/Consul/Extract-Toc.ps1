@@ -1,7 +1,7 @@
 ﻿
 $asParser = [AngleSharp.Html.Parser.HtmlParser]::new()
 
-#$iwr = Invoke-WebRequest -UseBasicParsing -Uri https://www.consul.io/api-docs
+ $iwr = Invoke-WebRequest -UseBasicParsing -Uri https://www.consul.io/api-docs
 
 $as = $asParser.ParseDocument($iwr.content)
 

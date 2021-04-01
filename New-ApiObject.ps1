@@ -400,7 +400,7 @@ param (
             '$hash{0}Parameters = @{{}}' -f $usage
             ''
             'foreach ($par in $hash{0}Parameters) {{' -f $usage
-            '    if ($PSBoundParameters.Keys -contains $par) {{' -f $usage
+            '    if ($PSBoundParameters.psbase.Keys -contains $par) {{' -f $usage
             '        $hash{0}Parameters.Add($par, $PSBoundParameters[$par])' -f $usage
             '        }'
             '    }'
@@ -417,7 +417,7 @@ param (
                 '$hash{0}Parameters = @{{}}' -f $usage
                 ''
                 'foreach ($par in ${0}Parameters) {{' -f $usage
-                '    if ($PSBoundParameters.Keys -contains $par) {{' -f $usage
+                '    if ($PSBoundParameters.psbase.Keys -contains $par) {{' -f $usage
                 '        $hash{0}Parameters.Add($par, $PSBoundParameters[$par])' -f $usage
                 '        }'
                 '    }'

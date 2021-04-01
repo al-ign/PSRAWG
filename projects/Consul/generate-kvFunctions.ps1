@@ -30,7 +30,7 @@ $endblock = @'
         
         $query = '?' + (
             (
-                $hashQueryParameters.Keys | % {
+                $hashQueryParameters.psbase.Keys | % {
                     '{0}={1}' -f $_, $hashQueryParameters.$_
                     }    
                 ) -join '&'
@@ -98,6 +98,7 @@ foreach ($g in $gen) {
         $g.Params += New-ApiParam @splat
     }
 
+# add a parameter to supply the value for the key
 $gen | ? PSFunctionName -EQ 'Set-ConsulKey' | % {
     $g = $_
             $splat = @{
@@ -109,6 +110,12 @@ $gen | ? PSFunctionName -EQ 'Set-ConsulKey' | % {
         $g.Params += New-ApiParam @splat
     }
 
+$gen | ? PSFunctionName -EQ 'Get-ConsulKey' | % {
+    $g = $_
+    $g.Params | where Type -eq bool | % {$_.Type = 'switch'}
+    }
+
+# initilize scriptproperty
 $gen.ps.ScriptBlock | Out-Null
 
 $gen | select ApiFunctionName, Verb, PSFunctionName, SyntaxCheckPass | ft
