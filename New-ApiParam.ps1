@@ -26,7 +26,10 @@ param (
     $Position,
 
     # Where the parameter is used, eg. Headers, Body
-    $UsedIn = $null
+    $UsedIn = $null,
+
+    # Default value to assign
+    $DefaultValue = $null
     )
 
     $obj = [pscustomobject]@{
@@ -39,6 +42,7 @@ param (
         ParameterSetName = $ParameterSetName
         Position = $Position
         UsedIn = $UsedIn
+        DefaultValue = $DefaultValue
         }
 
 
@@ -66,12 +70,19 @@ param (
             $arrStr += "    [Alias('{0}')]" -f $this.Alias
             }
 
+        $tStr = '    '
+
         if ($this.Type) {
-            $arrStr += '    [{1}]${0}' -f $this.Name, $this.Type
+            $tStr += '[{0}]' -f $this.Type
             }
-        else {
-            $arrStr += '    ${0}' -f $this.Name
+        
+        $tStr += '${0}' -f $this.Name
+        
+        if ($this.DefaultValue) {
+            $tStr += ' = {0}' -f $this.DefaultValue
             }
+
+        $arrStr += $tStr
 
         $arrStr
 

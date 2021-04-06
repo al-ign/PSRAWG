@@ -40,8 +40,7 @@ $endblock = @'
     $splat = @{
         Method = 'zxcMETHODzxc'
         Uri = '{0}/v1zxcPATHzxc{1}{2}' -f $ApiUri, $Key, $query
-
-        ContentType = 'application/json'
+        ContentType = 'application/json; charset=utf-8'
         }
 
     if ($splat.Method -eq 'PUT') {
@@ -96,6 +95,7 @@ foreach ($g in $gen) {
             Required = $true
             }
         $g.Params += New-ApiParam @splat
+
     }
 
 # add a parameter to supply the value for the key
@@ -108,6 +108,22 @@ $gen | ? PSFunctionName -EQ 'Set-ConsulKey' | % {
             UsedIn = 'body'
             }
         $g.Params += New-ApiParam @splat
+
+        $splat = @{
+            Name = 'ContentType'
+            Type = 'string'
+            Description = 'Content type to use'
+            #UsedIn = ''
+            #Required = $true
+            DefaultValue = "'application/json; charset=utf-8'"
+            }
+        $g.Params += New-ApiParam @splat
+
+        $g.FriendlyAlias ='New-ConsulKey'
+
+         $g.ps.EndBlock = $g.ps.EndBlock -replace [regex]::Escape("        ContentType = 'application/json; charset=utf-8'"),'        ContentType = $ContentType'
+
+    #ContentType = 'application/json'
     }
 
 $gen | ? PSFunctionName -EQ 'Get-ConsulKey' | % {
@@ -131,6 +147,12 @@ class ConsulKey {
 
     [string] ToUnicode () {
         return [System.Text.Encoding]::Unicode.GetString(
+            [System.Convert]::FromBase64String($this.Value)
+            )
+        }
+
+    [string] ToUTF8 () {
+        return [System.Text.Encoding]::UTF8.GetString(
             [System.Convert]::FromBase64String($this.Value)
             )
         }
