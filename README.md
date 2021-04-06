@@ -2,7 +2,7 @@
 
 A little utility project to help with creating PS modules for various REST API services
 
-This project was originally to create https://github.com/al-ign/PS2Kanboard module
+This project was originally developed to create https://github.com/al-ign/PS2Kanboard module
 
 # Usage
 
