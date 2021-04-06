@@ -84,6 +84,7 @@ foreach ($g in $gen) {
             Type = 'string'
             Description = 'Authentication token'
             UsedIn = 'auth'
+            API = $false
             }
         $g.Params += New-ApiParam @splat
 
@@ -93,6 +94,7 @@ foreach ($g in $gen) {
             Description = 'Consul URI'
             UsedIn = 'auth'
             Required = $true
+            API = $false
             }
         $g.Params += New-ApiParam @splat
 
@@ -116,6 +118,7 @@ $gen | ? PSFunctionName -EQ 'Set-ConsulKey' | % {
             #UsedIn = ''
             #Required = $true
             DefaultValue = "'application/json; charset=utf-8'"
+            API = $false
             }
         $g.Params += New-ApiParam @splat
 

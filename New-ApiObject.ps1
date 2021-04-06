@@ -399,7 +399,7 @@ param (
             '${0}Parameters = @({1})' -f $usage, (ToArrayDef $apiParameters.Name)
             '$hash{0}Parameters = @{{}}' -f $usage
             ''
-            'foreach ($par in $hash{0}Parameters) {{' -f $usage
+            'foreach ($par in ${0}Parameters) {{' -f $usage
             '    if ($PSBoundParameters.psbase.Keys -contains $par) {{' -f $usage
             '        $hash{0}Parameters.Add($par, $PSBoundParameters[$par])' -f $usage
             '        }'
@@ -407,7 +407,7 @@ param (
             ''
 
 
-            # if there are parameters with defined usage, create a separate variables for each usage
+            # if there are parameters with a defined usage, create a separate variables for each usage
             $uniqueUsedIn = $this.parent.Params | ? {$_.UsedIn} | Select-Object -Property UsedIn -Unique -ExpandProperty UsedIn
 
             foreach ($usage in $uniqueUsedIn) {
