@@ -71,6 +71,7 @@ param (
             ProcessBlock = @()
             EndBlock = @()
 
+            GenerateHelperFunctions = $true
             # placeholder for the parent object
             Parent = $null
             }
@@ -271,7 +272,7 @@ param (
     # auto make PS function footer
     $FooterBlock = {
         ''
-        '}} # End {0} function' -f $thisFunction.PSFunctionName
+        '}} # End {0} function' -f $this.PSFunctionName
         }
 
     $memberParam = @{
@@ -289,28 +290,38 @@ param (
     $MainBlock = {
         $arrStr = @()
         
-#        if ($this.BeginBlock) {
-            $arrStr += 'Begin {'
+        filter PrependSpaces {
+            param ($n = 4)
+            $x = $_
+            $s = ' ' * $n
+            (($x -split '[\n\r]+') | % {$_ -replace '(^.)',('{0}$1' -f $s)}) -join [System.Environment]::NewLine
+            }
 
-            #add some helper functions, comment next line if you don't need them
-            $this.HelperFunctionsBlock -split [environment]::NewLine | % {$arrStr += $_}
-
-            $this.BeginBlock -split [environment]::NewLine | % {$arrStr += $_}
-            $arrStr += '} # End begin block'
+        if ($this.GenerateHelperFunctions) {
+            $arrStr += 'Begin {' | PrependSpaces
+            $this.HelperFunctionsBlock -split [environment]::NewLine | PrependSpaces | % {$arrStr += $_}
+            $this.BeginBlock -split [environment]::NewLine | PrependSpaces | % {$arrStr += $_}
+            $arrStr += '} # End begin block' | PrependSpaces
             $arrStr += ''
- #           }
+            }
+        elseif ($this.BeginBlock) {
+            $arrStr += 'Begin {' | PrependSpaces
+            $this.BeginBlock -split [environment]::NewLine | PrependSpaces | % {$arrStr += $_}
+            $arrStr += '} # End begin block' | PrependSpaces
+            $arrStr += ''            
+            }
 
         if ($this.ProcessBlock) {
-            $arrStr += 'Process {'
-            $this.ProcessBlock -split [environment]::NewLine | % {$arrStr += $_}
-            $arrStr += '} # End process block'
+            $arrStr += 'Process {' | PrependSpaces
+            $this.ProcessBlock -split [environment]::NewLine | PrependSpaces | % {$arrStr += $_}
+            $arrStr += '} # End process block' | PrependSpaces
             $arrStr += ''
             }
 
         if ($this.EndBlock) {
-            $arrStr += 'End {'
-            $this.EndBlock -split [environment]::NewLine | % {$arrStr += $_}
-            $arrStr += '} # End end block'
+            $arrStr += 'End {' | PrependSpaces
+            $this.EndBlock -split [environment]::NewLine | PrependSpaces | % {$arrStr += $_}
+            $arrStr += '} # End end block' | PrependSpaces
             $arrStr += ''
             }
 
@@ -395,7 +406,8 @@ param (
 
             # create deafult block with all API parameters
             $usage = 'Api'
-
+            '# parameters marked as an API parameters'
+            ''
             '${0}Parameters = @({1})' -f $usage, (ToArrayDef $apiParameters.Name)
             '$hash{0}Parameters = @{{}}' -f $usage
             ''
@@ -407,12 +419,14 @@ param (
             ''
 
 
-            # if there are parameters with a defined usage, create a separate variables for each usage
-            $uniqueUsedIn = $this.parent.Params | ? {$_.UsedIn} | Select-Object -Property UsedIn -Unique -ExpandProperty UsedIn
+            # if there are parameters with a defined usage, create a separate hashtable for each usage
+            $uniqueUsedIn = @($this.parent.Params | ? {$_.UsedIn} | Select-Object -Property UsedIn -Unique -ExpandProperty UsedIn)
 
             foreach ($usage in $uniqueUsedIn) {
                 $paramsWithThisUsage = $this.parent.Params | ? {$_.UsedIn -eq $usage}
 
+                '# parameters marked as used in {0}' -f $usage
+                ''
                 '${0}Parameters = @({1})' -f $usage, (ToArrayDef $paramsWithThisUsage.name)
                 '$hash{0}Parameters = @{{}}' -f $usage
                 ''
@@ -422,9 +436,17 @@ param (
                 '        }'
                 '    }'
                 ''
-
                 }
 
+            if ($uniqueUsedIn -icontains 'query') {
+                'if ($hashQueryParameters) {'
+                '    $Query = $hashQueryParameters.psbase.Keys | % {'
+                '        ''{0}={1}'' -f $_, $hashQueryParameters[$_]'
+                '        }'
+                '    $Query = ''?'' + ($query -join ''&'')'
+                '}'
+                ''                
+                }
             } # End if ($apiParameters = $this.parent.Params
 
         }

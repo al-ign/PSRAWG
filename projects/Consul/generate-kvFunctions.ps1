@@ -1,7 +1,7 @@
 ﻿$gen = @()
 
 foreach ($f in $functions) {
-    $a = New-ApiObject -NounPrefix Consul -ApiFunctionName ($f.title + ' ' + $f.Synopsis)
+    $a = New-ApiObject -NounPrefix Consul -ApiFunctionName (($f.title + ' ' + $f.Synopsis) -replace '\W','-')
     $a.Verb = $f.Method[0].Method
     $a.Noun = 'Key'
     $a.doc.Synopsis = $f.Synopsis
@@ -25,37 +25,25 @@ foreach ($f in $functions) {
 
 # add Endblock code
 $endblock = @'
+$splat = @{
+    Method = 'zxcMETHODzxc'
+    Uri = '{0}/v1zxcPATHzxc{1}{2}' -f $ApiUri, $Key, $Query
+    ContentType = 'application/json; charset=utf-8'
+    }
 
-    if ($hashQueryParameters) {
+if ($splat.Method -eq 'PUT') {
+    $splat.Add('Body',$Value)
+    }
         
-        $query = '?' + (
-            (
-                $hashQueryParameters.psbase.Keys | % {
-                    '{0}={1}' -f $_, $hashQueryParameters.$_
-                    }    
-                ) -join '&'
-            )
+if ($Token) {
+    $headers = @{
+        'X-Consul-Token' = $token
         }
+    $splat.Add('Headers',$headers)
+    }
 
-    $splat = @{
-        Method = 'zxcMETHODzxc'
-        Uri = '{0}/v1zxcPATHzxc{1}{2}' -f $ApiUri, $Key, $query
-        ContentType = 'application/json; charset=utf-8'
-        }
-
-    if ($splat.Method -eq 'PUT') {
-        $splat.Add('Body',$Value)
-        }
-        
-    if ($Token) {
-        $headers = @{
-            'X-Consul-Token' = $token
-            }
-        $splat.Add('Headers',$headers)
-        }
-
-    $irm = Invoke-RestMethod   @splat -Verbose
-    $irm
+$irm = Invoke-RestMethod @splat -Verbose
+$irm
 '@ -replace 'zxcMETHODzxc',$f.Method[0].Method -replace 'zxcPATHzxc',($f.Method[0].Path -replace '\:\w+')
 
     $a.ps.EndBlock = $endblock
@@ -107,7 +95,7 @@ $gen | ? PSFunctionName -EQ 'Set-ConsulKey' | % {
             Name = 'Value'
             
             Description = 'Key Value'
-            UsedIn = 'body'
+            UsedIn = 'body' 
             }
         $g.Params += New-ApiParam @splat
 
