@@ -113,6 +113,44 @@ $gen | ? PSFunctionName -EQ 'Set-ConsulKey' | % {
 $gen | ? PSFunctionName -EQ 'Get-ConsulKey' | % {
     $g = $_
     $g.Params | where Type -eq bool | % {$_.Type = 'switch'}
+
+    $g.ps.BeginBlock = @'
+class ConsulKey {
+    [int]$CreateIndex
+    [int]$Flags
+    [string]$Key
+    [int]$LockIndex
+    [int]$ModifyIndex
+    [string]$Value
+
+    [string] ToASCII () {
+        return [System.Text.Encoding]::ASCII.GetString(
+            [System.Convert]::FromBase64String($this.Value)
+            )
+        }
+
+    [string] ToUnicode () {
+        return [System.Text.Encoding]::Unicode.GetString(
+            [System.Convert]::FromBase64String($this.Value)
+            )
+        }
+
+    }
+'@
+
+$getConsulKeyCustom = @'
+    #map to the class if not recurse
+    if ($PSBoundParameters.psbase.Keys -match 'keys|recurse|raw') {
+        $irm
+        }
+    else {
+        foreach ($thisResponse in $irm) {
+            [ConsulKey]$thisResponse
+            }
+        }
+'@
+
+$g.ps.EndBlock = $g.ps.EndBlock -replace '(\$irm)(?!\s+=\s+Invoke)',$getConsulKeyCustom
     }
 
 # initilize scriptproperty
